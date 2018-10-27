@@ -93,6 +93,21 @@ class Configuration : public Persistable {
     void setSearchIgnoreCaseDefault( bool ignore_case )
     { searchIgnoreCase_ = ignore_case; }
 
+    bool isSearchLineRange()
+    { return searchLineRange_; }
+    void setSearchLineRange( bool line_range )
+    { searchLineRange_ = line_range; }
+
+    uint32_t fromLineNumber()
+    { return fromLineNumber_; }
+    void setFromLineNumber( uint32_t from_line)
+    { fromLineNumber_ = from_line; }
+
+    uint32_t uptoLineNumber()
+    { return uptoLineNumber_; }
+    void setUptoLineNumber( uint32_t upto_line)
+    { uptoLineNumber_ = upto_line; }
+
     // Reads/writes the current config in the QSettings object passed
     virtual void saveToStorage( QSettings& settings ) const;
     virtual void retrieveFromStorage( QSettings& settings );
@@ -115,6 +130,9 @@ class Configuration : public Persistable {
     // Default settings for new views
     bool searchAutoRefresh_;
     bool searchIgnoreCase_;
+    bool searchLineRange_;
+    uint32_t fromLineNumber_;
+    uint32_t uptoLineNumber_;
 };
 
 #endif

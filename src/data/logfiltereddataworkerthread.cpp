@@ -119,7 +119,7 @@ LogFilteredDataWorkerThread::~LogFilteredDataWorkerThread()
     wait();
 }
 
-void LogFilteredDataWorkerThread::search( const QRegularExpression& regExp )
+void LogFilteredDataWorkerThread::search( const QRegularExpression& regExp , qint64 fromLine , qint64 uptoLine)
 {
     QMutexLocker locker( &mutex_ );  // to protect operationRequested_
 
@@ -131,11 +131,11 @@ void LogFilteredDataWorkerThread::search( const QRegularExpression& regExp )
 
     interruptRequested_ = false;
     operationRequested_ = new FullSearchOperation( sourceLogData_,
-            regExp, &interruptRequested_ );
+            regExp, &interruptRequested_ , fromLine , uptoLine );
     operationRequestedCond_.wakeAll();
 }
 
-void LogFilteredDataWorkerThread::updateSearch(const QRegularExpression &regExp, qint64 position )
+void LogFilteredDataWorkerThread::updateSearch(const QRegularExpression &regExp, qint64 fromLine , qint64 uptoLine )
 {
     QMutexLocker locker( &mutex_ );  // to protect operationRequested_
 
@@ -147,7 +147,7 @@ void LogFilteredDataWorkerThread::updateSearch(const QRegularExpression &regExp,
 
     interruptRequested_ = false;
     operationRequested_ = new UpdateSearchOperation( sourceLogData_,
-            regExp, &interruptRequested_, position );
+            regExp, &interruptRequested_, fromLine , uptoLine );
     operationRequestedCond_.wakeAll();
 }
 
@@ -209,21 +209,34 @@ void LogFilteredDataWorkerThread::run()
 //
 
 SearchOperation::SearchOperation( const LogData* sourceLogData,
-        const QRegularExpression& regExp, bool* interruptRequest )
+        const QRegularExpression& regExp, bool* interruptRequest , qint64 fromLine , qint64 uptoLine)
     : regexp_( regExp ), sourceLogData_( sourceLogData )
 {
     interruptRequested_ = interruptRequest;
+    fromLine_ = fromLine;
+    uptoLine_ = uptoLine;
 }
 
-void SearchOperation::doSearch( SearchData& searchData, qint64 initialLine )
-{
-    const qint64 nbSourceLines = sourceLogData_->getNbLine();
+void SearchOperation::doSearch(SearchData& searchData, qint64 initialLine)
+{   
+    qint64 nbSourceLines = sourceLogData_->getNbLine();
     int maxLength = 0;
     int nbMatches = searchData.getNbMatches();
     SearchResultArray currentList = SearchResultArray();
 
     // Ensure no re-alloc will be done
     currentList.reserve( nbLinesInChunk );
+
+    if( initialLine < fromLine_ )
+    {
+        initialLine = fromLine_;
+    }
+
+
+    if( uptoLine_ > 0 && uptoLine_ < nbSourceLines )
+    {
+        nbSourceLines = uptoLine_;
+    }
 
     LOG(logDEBUG) << "Searching from line " << initialLine << " to " << nbSourceLines;
 
@@ -272,7 +285,7 @@ void FullSearchOperation::start( SearchData& searchData )
 // Called in the worker thread's context
 void UpdateSearchOperation::start( SearchData& searchData )
 {
-    qint64 initial_line = initialPosition_;
+    qint64 initial_line = fromLine_;
 
     if ( initial_line >= 1 ) {
         // We need to re-search the last line because it might have

@@ -557,6 +557,12 @@ void CrawlerWidget::searchRefreshChangedHandler( int state )
     printSearchInfoMessage( logFilteredData_->getNbMatches() );
 }
 
+void CrawlerWidget::searchRangeChangeHandler(int state)
+{
+    searchFromEdit->setEnabled(Qt::Checked == state);
+    searchUpToEdit->setEnabled(Qt::Checked == state);
+}
+
 void CrawlerWidget::searchTextChangeHandler()
 {
     // We suspend auto-refresh
@@ -695,6 +701,7 @@ void CrawlerWidget::setup()
 
     ignoreCaseCheck = new QCheckBox( "Ignore &case" );
     searchRefreshCheck = new QCheckBox( "Auto-&refresh" );
+    searchRangehCheck  = new QCheckBox( "Range-&search" );
 
     // Construct the Search line
     searchLabel = new QLabel(tr("&Text: "));
@@ -706,6 +713,22 @@ void CrawlerWidget::setup()
     searchLineEdit->setSizeAdjustPolicy( QComboBox::AdjustToMinimumContentsLengthWithIcon );
 
     searchLabel->setBuddy( searchLineEdit );
+
+    searchFromEdit = new QSpinBox;
+    searchFromEdit->setPrefix("From:");
+    searchFromEdit->setMaximum((1<<30)-1);
+    searchFromEdit->setMinimum(0);
+    searchFromEdit->setReadOnly(false);
+    searchFromEdit->setEnabled(false);
+    searchFromEdit->setToolTip("0 - begin of file");
+
+    searchUpToEdit = new QSpinBox;
+    searchUpToEdit->setPrefix("To:");
+    searchUpToEdit->setMaximum((1<<30)-1);
+    searchUpToEdit->setMinimum(0);
+    searchUpToEdit->setReadOnly(false);
+    searchUpToEdit->setEnabled(false);
+    searchUpToEdit->setToolTip("0 - end of file");
 
     searchButton = new QToolButton();
     searchButton->setText( tr("&Search") );
@@ -719,6 +742,8 @@ void CrawlerWidget::setup()
     QHBoxLayout* searchLineLayout = new QHBoxLayout;
     searchLineLayout->addWidget(searchLabel);
     searchLineLayout->addWidget(searchLineEdit);
+    searchLineLayout->addWidget(searchFromEdit);
+    searchLineLayout->addWidget(searchUpToEdit);
     searchLineLayout->addWidget(searchButton);
     searchLineLayout->addWidget(stopButton);
     searchLineLayout->setContentsMargins(6, 0, 6, 0);
@@ -728,6 +753,7 @@ void CrawlerWidget::setup()
     QHBoxLayout* searchInfoLineLayout = new QHBoxLayout;
     searchInfoLineLayout->addWidget( visibilityBox );
     searchInfoLineLayout->addWidget( searchInfoLine );
+    searchInfoLineLayout->addWidget( searchRangehCheck );
     searchInfoLineLayout->addWidget( ignoreCaseCheck );
     searchInfoLineLayout->addWidget( searchRefreshCheck );
 
@@ -756,6 +782,10 @@ void CrawlerWidget::setup()
     searchRefreshChangedHandler( searchRefreshCheck->checkState() );
     ignoreCaseCheck->setCheckState( config->isSearchIgnoreCaseDefault() ?
             Qt::Checked : Qt::Unchecked );
+    searchRangehCheck->setCheckState( config->isSearchLineRange() ?
+            Qt::Checked : Qt::Unchecked );
+    // Manually call the handler as it is not called when changing the state programmatically
+    searchRangeChangeHandler( searchRangehCheck->checkState() );
 
     // Connect the signals
     connect(searchLineEdit->lineEdit(), SIGNAL( returnPressed() ),
@@ -822,14 +852,19 @@ void CrawlerWidget::setup()
 
     // Search auto-refresh
     connect( searchRefreshCheck, SIGNAL( stateChanged( int ) ),
-            this, SLOT( searchRefreshChangedHandler( int ) ) );
+            this, SLOT( searchRefreshChangedHandler( int ) ) );    
+
+    connect( searchRangehCheck, SIGNAL( stateChanged( int ) ),
+            this, SLOT( searchRangeChangeHandler( int ) ) );
 
     // Advise the parent the checkboxes have been changed
     // (for maintaining default config)
     connect( searchRefreshCheck, SIGNAL( stateChanged( int ) ),
             this, SIGNAL( searchRefreshChanged( int ) ) );
     connect( ignoreCaseCheck, SIGNAL( stateChanged( int ) ),
-            this, SIGNAL( ignoreCaseChanged( int ) ) );
+            this, SIGNAL( ignoreCaseChanged( int ) ) );    
+    connect( searchRangehCheck, SIGNAL( stateChanged( int ) ),
+            this, SIGNAL( searchRangeChanged( int ) ) );
 
     // Switch between views
     connect( logMainView, SIGNAL( exitView() ),
@@ -894,7 +929,9 @@ void CrawlerWidget::replaceCurrentSearch( const QString& searchText )
             // Activate the stop button
             stopButton->setEnabled( true );
             // Start a new asynchronous search
-            logFilteredData_->runSearch( regexp );
+            logFilteredData_->runSearch( regexp ,
+                     searchFromEdit->isEnabled() ? searchFromEdit->value() : 0 ,
+                     searchUpToEdit->isEnabled() ? searchUpToEdit->value() : 0);
             // Accept auto-refresh of the search
             searchState_.startSearch();
         }

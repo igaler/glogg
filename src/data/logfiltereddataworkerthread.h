@@ -89,7 +89,7 @@ class SearchOperation : public QObject
   Q_OBJECT
   public:
     SearchOperation(const LogData* sourceLogData,
-            const QRegularExpression &regExp, bool* interruptRequest );
+            const QRegularExpression &regExp, bool* interruptRequest , qint64 fromLine , qint64 uptoLine);
 
     virtual ~SearchOperation() { }
 
@@ -105,9 +105,11 @@ class SearchOperation : public QObject
 
     // Implement the common part of the search, passing
     // the shared results and the line to begin the search from.
-    void doSearch( SearchData& result, qint64 initialLine );
+    void doSearch(SearchData& result, qint64 initialLine );
 
     bool* interruptRequested_;
+    qint64 fromLine_;
+    qint64 uptoLine_;
     const QRegularExpression regexp_;
     const LogData* sourceLogData_;
 };
@@ -116,8 +118,8 @@ class FullSearchOperation : public SearchOperation
 {
   public:
     FullSearchOperation( const LogData* sourceLogData, const QRegularExpression& regExp,
-            bool* interruptRequest )
-        : SearchOperation( sourceLogData, regExp, interruptRequest ) {}
+            bool* interruptRequest , qint64 fromLine , qint64 uptoLine)
+        : SearchOperation( sourceLogData, regExp, interruptRequest , fromLine , uptoLine) {}
     virtual void start( SearchData& result );
 };
 
@@ -125,13 +127,10 @@ class UpdateSearchOperation : public SearchOperation
 {
   public:
     UpdateSearchOperation( const LogData* sourceLogData, const QRegularExpression& regExp,
-            bool* interruptRequest, qint64 position )
-        : SearchOperation( sourceLogData, regExp, interruptRequest ),
-        initialPosition_( position ) {}
+            bool* interruptRequest, qint64 fromLine , qint64 uptoLine)
+        : SearchOperation( sourceLogData, regExp, interruptRequest , fromLine , uptoLine) {}
     virtual void start( SearchData& result );
 
-  private:
-    qint64 initialPosition_;
 };
 
 // Create and manage the thread doing loading/indexing for
@@ -148,10 +147,10 @@ class LogFilteredDataWorkerThread : public QThread
     ~LogFilteredDataWorkerThread();
 
     // Start the search with the passed regexp
-    void search(const QRegularExpression &regExp );
+    void search(const QRegularExpression &regExp , qint64 fromLine, qint64 uptoLine);
     // Continue the previous search starting at the passed position
     // in the source file (line number)
-    void updateSearch( const QRegularExpression& regExp, qint64 position );
+    void updateSearch(const QRegularExpression& regExp, qint64 fromLine , qint64 uptoLine);
     // Interrupts the search if one is in progress
     void interrupt();
 

@@ -25,6 +25,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -128,6 +129,8 @@ class CrawlerWidget : public QSplitter,
     void searchRefreshChanged( int state );
     // "ignore case" check has been changed
     void ignoreCaseChanged( int state );
+    // "range" check has been changed
+    void searchRangeChanged( int state);
 
     // Sent when the data status (whether new not seen data are
     // available) has changed
@@ -165,6 +168,8 @@ class CrawlerWidget : public QSplitter,
 
     // Called when the checkbox for search auto-refresh is changed
     void searchRefreshChangedHandler( int state );
+
+    void searchRangeChangeHandler( int state );
 
     // Called when the text on the search line is modified
     void searchTextChangeHandler();
@@ -239,6 +244,8 @@ class CrawlerWidget : public QSplitter,
     QWidget*        bottomWindow;
     QLabel*         searchLabel;
     QComboBox*      searchLineEdit;
+    QSpinBox*       searchFromEdit;
+    QSpinBox*       searchUpToEdit;
     QToolButton*    searchButton;
     QToolButton*    stopButton;
     FilteredView*   filteredView;
@@ -246,6 +253,7 @@ class CrawlerWidget : public QSplitter,
     InfoLine*       searchInfoLine;
     QCheckBox*      ignoreCaseCheck;
     QCheckBox*      searchRefreshCheck;
+    QCheckBox*      searchRangehCheck;
     OverviewWidget* overviewWidget_;
 
     QVBoxLayout*    bottomMainLayout;

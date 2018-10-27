@@ -118,6 +118,8 @@ MainWindow::MainWindow( std::unique_ptr<Session> session,
             this, SLOT( handleSearchRefreshChanged( int ) ) );
     signalMux_.connect( SIGNAL( ignoreCaseChanged( int ) ),
             this, SLOT( handleIgnoreCaseChanged( int ) ) );
+    signalMux_.connect( SIGNAL( searchRangeChanged( int ) ),
+            this, SLOT( handleSearchRangeChanged( int ) ) );
 
     // Configure the main tabbed widget
     mainTabWidget_.setDocumentMode( true );
@@ -663,6 +665,12 @@ void MainWindow::handleIgnoreCaseChanged( int state )
 {
     auto config = Persistent<Configuration>( "settings" );
     config->setSearchIgnoreCaseDefault( state == Qt::Checked );
+}
+
+void MainWindow::handleSearchRangeChanged( int state )
+{
+    auto config = Persistent<Configuration>( "settings" );
+    config->setSearchLineRange( state == Qt::Checked );
 }
 
 void MainWindow::closeTab( int index )

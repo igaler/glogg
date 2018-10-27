@@ -109,6 +109,7 @@ class MainWindow : public QMainWindow
     // is changing their view options.
     void handleSearchRefreshChanged( int state );
     void handleIgnoreCaseChanged( int state );
+    void handleSearchRangeChanged( int state );
 
     // Close the tab with the passed index
     void closeTab( int index );

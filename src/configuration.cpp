@@ -51,6 +51,7 @@ Configuration::Configuration()
 
     searchAutoRefresh_ = false;
     searchIgnoreCase_  = false;
+    searchLineRange_   = false;
 }
 
 // Accessor functions
@@ -114,6 +115,8 @@ void Configuration::retrieveFromStorage( QSettings& settings )
         searchAutoRefresh_ = settings.value( "defaultView.searchAutoRefresh" ).toBool();
     if ( settings.contains( "defaultView.searchIgnoreCase" ) )
         searchIgnoreCase_ = settings.value( "defaultView.searchIgnoreCase" ).toBool();
+    if ( settings.contains( "defaultView.searchIgnoreCase" ) )
+        searchLineRange_ = settings.value( "defaultView.searchLineRange" ).toBool();
 }
 
 void Configuration::saveToStorage( QSettings& settings ) const
@@ -136,4 +139,5 @@ void Configuration::saveToStorage( QSettings& settings ) const
     settings.setValue( "view.lineNumbersVisibleInFiltered", lineNumbersVisibleInFiltered_ );
     settings.setValue( "defaultView.searchAutoRefresh", searchAutoRefresh_ );
     settings.setValue( "defaultView.searchIgnoreCase", searchIgnoreCase_ );
+    settings.setValue( "defaultView.searchLineRange", searchLineRange_ );
 }
