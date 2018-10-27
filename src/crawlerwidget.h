@@ -169,6 +169,7 @@ class CrawlerWidget : public QSplitter,
     // Called when the checkbox for search auto-refresh is changed
     void searchRefreshChangedHandler( int state );
 
+    // Called when the checkbox for search lines range is changed
     void searchRangeChangeHandler( int state );
 
     // Called when the text on the search line is modified

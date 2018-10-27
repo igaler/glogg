@@ -701,7 +701,7 @@ void CrawlerWidget::setup()
 
     ignoreCaseCheck = new QCheckBox( "Ignore &case" );
     searchRefreshCheck = new QCheckBox( "Auto-&refresh" );
-    searchRangehCheck  = new QCheckBox( "Range-&search" );
+    searchRangehCheck  = new QCheckBox( "&Line-range" );
 
     // Construct the Search line
     searchLabel = new QLabel(tr("&Text: "));
