@@ -115,7 +115,7 @@ void Configuration::retrieveFromStorage( QSettings& settings )
         searchAutoRefresh_ = settings.value( "defaultView.searchAutoRefresh" ).toBool();
     if ( settings.contains( "defaultView.searchIgnoreCase" ) )
         searchIgnoreCase_ = settings.value( "defaultView.searchIgnoreCase" ).toBool();
-    if ( settings.contains( "defaultView.searchIgnoreCase" ) )
+    if ( settings.contains( "defaultView.searchLineRange" ) )
         searchLineRange_ = settings.value( "defaultView.searchLineRange" ).toBool();
 }
 
