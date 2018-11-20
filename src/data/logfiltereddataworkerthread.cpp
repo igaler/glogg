@@ -297,3 +297,5 @@ void UpdateSearchOperation::start( SearchData& searchData )
 
     doSearch( searchData, initial_line );
 }
+
+

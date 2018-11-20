@@ -44,6 +44,10 @@ class TabbedCrawlerWidget : public QTabWidget
 
       // Set the data status (icon) for the tab number 'index'
       void setTabDataStatus( int index, DataStatus status );
+      void updateLineNumber(int index, int line );
+
+    signals:
+      void currentLine( const QString& );
 
     protected:
       void keyPressEvent( QKeyEvent* event );

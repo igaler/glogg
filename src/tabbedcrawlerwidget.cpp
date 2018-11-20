@@ -75,6 +75,9 @@ int TabbedCrawlerWidget::addTab( QWidget* page, const QString& label )
         // Listen for a changing data status:
         connect( crawler, &CrawlerWidget::dataStatusChanged,
                 [ this, index ]( DataStatus status ) { setTabDataStatus( index, status ); } );
+        // Listen for a changing data status:
+        connect( crawler, &CrawlerWidget::updateLineNumber,
+                [ this, index ]( int line ) { updateLineNumber( index, line ); } );
     }
 
     // Display the icon
@@ -175,4 +178,12 @@ void TabbedCrawlerWidget::setTabDataStatus( int index, DataStatus status )
         icon_label->setPixmap ( icon->pixmap(12,12) );
 
     }
+}
+
+void TabbedCrawlerWidget::updateLineNumber( int index, int line )
+{
+    LOG(logDEBUG) << "TabbedCrawlerWidget::updateLineNumber " << index;
+
+
+    emit currentLine( ((CrawlerWidget*)this->widget(currentIndex()))->getSelectedText() );
 }

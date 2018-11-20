@@ -86,7 +86,8 @@ void Session::save( std::vector<
             uint64_t,
             std::shared_ptr<const ViewContextInterface>>
         > view_list,
-        const QByteArray& geometry )
+        const QByteArray& geometry ,
+        const QByteArray& windows_state )
 {
     LOG(logDEBUG) << "Session::save";
 
@@ -109,6 +110,7 @@ void Session::save( std::vector<
         Persistent<SessionInfo>( "session" );
     session->setOpenFiles( session_files );
     session->setGeometry( geometry );
+    session->setWinState( windows_state );
     GetPersistentInfo().save( QString( "session" ) );
 }
 
@@ -136,13 +138,14 @@ std::vector<std::pair<std::string, ViewInterface*>> Session::restore(
     return result;
 }
 
-void Session::storedGeometry( QByteArray* geometry ) const
+void Session::storedGeometry( QByteArray* geometry , QByteArray* win_state ) const
 {
     GetPersistentInfo().retrieve( QString( "session" ) );
     std::shared_ptr<SessionInfo> session =
         Persistent<SessionInfo>( "session" );
 
     *geometry = session->geometry();
+    *win_state = session->winState();
 }
 
 std::string Session::getFilename( const ViewInterface* view ) const

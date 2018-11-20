@@ -42,6 +42,14 @@ class SessionInfo : public Persistable {
     void setGeometry( const QByteArray& geometry )
     { geometry_ = geometry; }
 
+    // State of the main window
+    // (this is an opaque string which is interpreted by the
+    // MainWindow implementation)
+    QByteArray winState() const
+    { return winState_; }
+    void setWinState( const QByteArray& winState )
+    { winState_ = winState; }
+
     struct OpenFile
     {
         std::string fileName;
@@ -65,6 +73,7 @@ class SessionInfo : public Persistable {
     static const int OPENFILES_VERSION;
 
     QByteArray geometry_;
+    QByteArray winState_;
     QByteArray crawlerState_;
     std::vector<OpenFile> openFiles_;
 };

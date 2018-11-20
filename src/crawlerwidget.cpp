@@ -27,6 +27,7 @@
 #include <cassert>
 
 #include <Qt>
+#include <QtWidgets>
 #include <QApplication>
 #include <QFile>
 #include <QLineEdit>

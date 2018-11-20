@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     bool new_session = false;
     bool load_session = false;
     bool multi_instance = false;
+    bool follow_file = false;
 #ifdef _WIN32
     bool log_to_file = false;
 #endif
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
             ("multi,m", "allow multiple instance of glogg to run simultaneously (use together with -s)")
             ("load-session,s", "load the previous session (default when no file is passed)")
             ("new-session,n", "do not load the previous session (default when a file is passed)")
+            ("follow-file,f", "follow file can be used only with new-session option")
 #ifdef _WIN32
             ("log,l", "save the log to a file (Windows only)")
 #endif
@@ -130,10 +132,15 @@ int main(int argc, char *argv[])
             multi_instance = true;
 
         if ( vm.count( "new-session" ) )
+        {
             new_session = true;
+            if(vm.count( "follow-file" ) )
+                follow_file = true;
+        }
 
         if ( vm.count( "load-session" ) )
             load_session = true;
+
 
 #ifdef _WIN32
         if ( vm.count( "log" ) )
@@ -254,9 +261,6 @@ int main(int argc, char *argv[])
     std::unique_ptr<Session> session( new Session() );
     MainWindow mw( std::move( session ), externalCommunicator );
 
-    // Geometry
-    mw.reloadGeometry();
-
     // Load the existing session if needed
     std::shared_ptr<Configuration> config =
         Persistent<Configuration>( "settings" );
@@ -267,10 +271,13 @@ int main(int argc, char *argv[])
     mw.show();
 
     for ( const auto& filename: filenames ) {
-        mw.loadInitialFile( QString::fromStdString( filename ) );
+        mw.loadInitialFile( QString::fromStdString( filename ) , follow_file );
     }
 
     mw.startBackgroundTasks();
+
+    // Geometry
+    mw.reloadGeometry();
 
     return app.exec();
 }

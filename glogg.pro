@@ -55,6 +55,7 @@ SOURCES += \
     src/viewtools.cpp \
     src/encodingspeculator.cpp \
     src/gloggapp.cpp \
+    src/decodedockwidget.cpp
 
 INCLUDEPATH += src/
 
@@ -103,6 +104,7 @@ HEADERS += \
     src/viewtools.h \
     src/encodingspeculator.h \
     src/gloggapp.h \
+    src/decodedockwidget.h
 
 isEmpty(BOOST_PATH) {
     message(Building using system dynamic Boost libraries)
@@ -318,3 +320,6 @@ else {
 perf {
     QMAKE_CXXFLAGS += -DGLOGG_PERF_MEASURE_FPS
 }
+
+DISTFILES += \
+    g_script.py

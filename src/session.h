@@ -80,13 +80,13 @@ class Session {
     // the main window know the order in which the views are presented to
     // the user (it might have changed since file were opened).
     // Also, the geometry information is passed as an opaque string.
-    void save( std::vector<
+    void save(std::vector<
                    std::tuple<const ViewInterface*, uint64_t, std::shared_ptr<const ViewContextInterface>>
                > view_list,
-           const QByteArray& geometry );
+           const QByteArray& geometry , const QByteArray &windows_state);
 
     // Get the geometry string from persistent storage for this session.
-    void storedGeometry( QByteArray* geometry ) const;
+    void storedGeometry(QByteArray* geometry , QByteArray *win_state) const;
 
     // Get the file name for the passed view.
     std::string getFilename( const ViewInterface* view ) const;

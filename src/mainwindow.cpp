@@ -25,6 +25,7 @@
 #include <cassert>
 
 #include <QAction>
+#include <QDockWidget>
 #include <QDesktopWidget>
 #include <QMenuBar>
 #include <QToolBar>
@@ -36,6 +37,7 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QUrl>
+
 
 #include "log.h"
 
@@ -51,6 +53,7 @@
 #include "tabbedcrawlerwidget.h"
 #include "externalcom.h"
 
+
 // Returns the size in human readable format
 static QString readableSize( qint64 size );
 
@@ -61,8 +64,9 @@ MainWindow::MainWindow( std::unique_ptr<Session> session,
     recentFiles_( Persistent<RecentFiles>( "recentFiles" ) ),
     mainIcon_(),
     signalMux_(),
-    quickFindMux_( session_->getQuickFindPattern() ),
-    mainTabWidget_()
+    quickFindMux_( session_->getQuickFindPattern() ),    
+    mainTabWidget_(),
+    decodeDockWidget_()
 #ifdef GLOGG_SUPPORTS_VERSION_CHECKING
     ,versionChecker_()
 #endif
@@ -132,6 +136,12 @@ MainWindow::MainWindow( std::unique_ptr<Session> session,
     connect( &mainTabWidget_, SIGNAL( currentChanged( int ) ),
             this, SLOT( currentTabChanged( int ) ) );
 
+    connect( &mainTabWidget_, SIGNAL(currentLine( const QString& ) ) ,
+             &decodeDockWidget_, SLOT( updateTextHandler( const QString& ) ) );
+
+    connect( this, SIGNAL( optionsChanged() ),
+             &decodeDockWidget_, SLOT( applyOptions() ) );
+
     // Establish the QuickFindWidget and mux ( to send requests from the
     // QFWidget to the right window )
     connect( &quickFindWidget_, SIGNAL( patternConfirmed( const QString&, bool ) ),
@@ -177,15 +187,23 @@ MainWindow::MainWindow( std::unique_ptr<Session> session,
     main_layout->addWidget( &quickFindWidget_ );
     central_widget->setLayout( main_layout );
 
+
+    decodeDockWidget_.setAllowedAreas(Qt::BottomDockWidgetArea);
+    decodeDockWidget_.setObjectName("DockWindow");
+    addDockWidget(Qt::BottomDockWidgetArea, &decodeDockWidget_);
     setCentralWidget( central_widget );
+
+
 }
 
 void MainWindow::reloadGeometry()
 {
     QByteArray geometry;
+    QByteArray win_state;
 
-    session_->storedGeometry( &geometry );
+    session_->storedGeometry( &geometry , &win_state);
     restoreGeometry( geometry );
+    restoreState( win_state );
 }
 
 void MainWindow::reloadSession()
@@ -209,13 +227,13 @@ void MainWindow::reloadSession()
         mainTabWidget_.setCurrentIndex( current_file_index );
 }
 
-void MainWindow::loadInitialFile( QString fileName )
+void MainWindow::loadInitialFile( QString fileName , bool follow_file)
 {
     LOG(logDEBUG) << "loadInitialFile";
 
     // Is there a file passed as argument?
     if ( !fileName.isEmpty() )
-        loadFile( fileName );
+        loadFile( fileName , follow_file );
 }
 
 void MainWindow::startBackgroundTasks()
@@ -422,9 +440,10 @@ void MainWindow::createToolBars()
     lineNbField->setText( "Line 0" );
     lineNbField->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
     lineNbField->setMinimumSize(
-            lineNbField->fontMetrics().size( 0, "Line 0000000") );
+    lineNbField->fontMetrics().size( 0, "Line 0000000") );
 
     toolBar = addToolBar( tr("&Toolbar") );
+    toolBar->setObjectName("ToolBar");
     toolBar->setIconSize( QSize( 14, 14 ) );
     toolBar->setMovable( false );
     toolBar->addAction( openAction );
@@ -454,7 +473,7 @@ void MainWindow::open()
     QString fileName = QFileDialog::getOpenFileName(this,
             tr("Open file"), defaultDir, tr("All files (*)"));
     if (!fileName.isEmpty())
-        loadFile(fileName);
+        loadFile(fileName , false);
 }
 
 // Opens a log file from the recent files list
@@ -462,7 +481,7 @@ void MainWindow::openRecentFile()
 {
     QAction* action = qobject_cast<QAction*>(sender());
     if (action)
-        loadFile(action->data().toString());
+        loadFile(action->data().toString() , false);
 }
 
 // Close current tab
@@ -529,8 +548,10 @@ void MainWindow::options()
 {
     OptionsDialog dialog(this);
     signalMux_.connect(&dialog, SIGNAL( optionsChanged() ), SLOT( applyConfiguration() ));
-    dialog.exec();
-    signalMux_.disconnect(&dialog, SIGNAL( optionsChanged() ), SLOT( applyConfiguration() ));
+    connect( &dialog, SIGNAL( optionsChanged() ), &decodeDockWidget_, SLOT( applyOptions() ));
+    dialog.exec();    
+    signalMux_.disconnect(&dialog, SIGNAL( optionsChanged() ), SLOT( applyConfiguration() ));    
+    disconnect(&dialog, SIGNAL( optionsChanged() ), &decodeDockWidget_, SLOT( applyOptions() ));
 }
 
 // Opens the 'About' dialog box.
@@ -730,7 +751,7 @@ void MainWindow::loadFileNonInteractive( const QString& file_name )
     LOG(logDEBUG) << "loadFileNonInteractive( "
         << file_name.toStdString() << " )";
 
-    loadFile( file_name );
+    loadFile( file_name , false);
 
     // Try to get the window to the front
     // This is a bit of a hack but has been tested on:
@@ -796,7 +817,7 @@ void MainWindow::dropEvent( QDropEvent* event )
     foreach( const QUrl& url, event->mimeData()->urls() ) {
         QString fileName = url.toLocalFile();
         if ( !fileName.isEmpty() ) {
-            loadFile( fileName );
+            loadFile( fileName , false );
         }
     }
 }
@@ -827,7 +848,7 @@ void MainWindow::keyPressEvent( QKeyEvent* keyEvent )
 // Create a CrawlerWidget for the passed file, start its loading
 // and update the title bar.
 // The loading is done asynchronously.
-bool MainWindow::loadFile( const QString& fileName )
+bool MainWindow::loadFile( const QString& fileName , bool follow_file )
 {
     LOG(logDEBUG) << "loadFile ( " << fileName.toStdString() << " )";
 
@@ -864,12 +885,15 @@ bool MainWindow::loadFile( const QString& fileName )
         // of the loading, with no way to switch to another tab
         mainTabWidget_.setCurrentIndex( index );
 
+        followAction->setChecked(follow_file);
+        //followSet(follow_file);
+
         // Update the recent files list
         // (reload the list first in case another glogg changed it)
         GetPersistentInfo().retrieve( "recentFiles" );
         recentFiles_->addRecent( fileName );
         GetPersistentInfo().save( "recentFiles" );
-        updateRecentFileActions();
+        updateRecentFileActions();        
     }
     catch ( FileUnreadableErr ) {
         LOG(logDEBUG) << "Can't open file " << fileName.toStdString();
@@ -991,7 +1015,7 @@ void MainWindow::writeSettings()
                 0UL,
                 view->context() ) );
     }
-    session_->save( widget_list, saveGeometry() );
+    session_->save( widget_list, saveGeometry() , saveState() );
 
     // User settings
     GetPersistentInfo().save( QString( "settings" ) );

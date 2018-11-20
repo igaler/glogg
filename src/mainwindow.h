@@ -34,6 +34,7 @@
 #include "versionchecker.h"
 #endif
 #include "utils.h"
+#include "decodedockwidget.h"
 
 class QAction;
 class QActionGroup;
@@ -60,7 +61,7 @@ class MainWindow : public QMainWindow
     // Re-load the files from the previous session
     void reloadSession();
     // Loads the initial file (parameter passed or from config file)
-    void loadInitialFile( QString fileName );
+    void loadInitialFile(QString fileName , bool follow_file);
     // Starts the lower priority activities the MW controls such as
     // version checking etc...
     void startBackgroundTasks();
@@ -147,7 +148,7 @@ class MainWindow : public QMainWindow
     void createRecentFileToolTipTimer();
     void readSettings();
     void writeSettings();
-    bool loadFile( const QString& fileName );
+    bool loadFile(const QString& fileName , bool follow_file);
     void updateTitleBar( const QString& file_name );
     void updateRecentFileActions();
     QString strippedName( const QString& fullFileName ) const;
@@ -217,6 +218,8 @@ class MainWindow : public QMainWindow
 
     // The main widget
     TabbedCrawlerWidget mainTabWidget_;
+
+    DecodeDockWidget decodeDockWidget_;
 
     // Version checker
 #ifdef GLOGG_SUPPORTS_VERSION_CHECKING

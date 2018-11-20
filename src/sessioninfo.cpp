@@ -30,6 +30,7 @@ void SessionInfo::retrieveFromStorage( QSettings& settings )
     LOG(logDEBUG) << "SessionInfo::retrieveFromStorage";
 
     geometry_     = settings.value("geometry").toByteArray();
+    winState_     = settings.value("winState").toByteArray();
 
     if ( settings.contains( "OpenFiles/version" ) ) {
         openFiles_.clear();
@@ -61,6 +62,7 @@ void SessionInfo::saveToStorage( QSettings& settings ) const
     LOG(logDEBUG) << "SessionInfo::saveToStorage";
 
     settings.setValue( "geometry", geometry_ );
+    settings.setValue( "winState", winState_ );
     settings.beginGroup( "OpenFiles" );
     settings.setValue( "version", OPENFILES_VERSION );
     settings.beginWriteArray( "openFiles" );
