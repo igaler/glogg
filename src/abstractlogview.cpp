@@ -327,7 +327,7 @@ void AbstractLogView::mousePressEvent( QMouseEvent* mouseEvent )
         if ( mouseEvent->modifiers() & Qt::ShiftModifier )
         {
             selection_.selectRangeFromPrevious( line );
-            emit updateLineNumber( line );
+            emit updateLineNumber( line );            
             update();
         }
         else

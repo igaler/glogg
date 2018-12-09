@@ -809,6 +809,8 @@ void CrawlerWidget::setup()
             filteredView, SLOT( update() ) );
     connect(logMainView, SIGNAL( updateLineNumber( int ) ),
             this, SLOT( updateLineNumberHandler( int ) ) );
+    connect(filteredView, SIGNAL( updateLineNumber( int ) ),
+            this, SLOT( updateLineNumberHandler( int ) ) );
     connect(logMainView, SIGNAL( markLine( qint64 ) ),
             this, SLOT( markLineFromMain( qint64 ) ) );
     connect(filteredView, SIGNAL( markLine( qint64 ) ),

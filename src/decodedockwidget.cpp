@@ -50,7 +50,7 @@ DecodeDockWidget::DecodeDockWidget() : QDockWidget(),
     decodedTextBox_.setLineWrapMode( QTextEdit::NoWrap );
 
     QPalette pallet = decodedTextBox_.palette();
-    pallet.setColor(QPalette::Base,Qt::darkGray);
+    pallet.setColor(QPalette::Base,Qt::darkBlue);
     decodedTextBox_.setPalette(pallet);
     decodedTextBox_.setTextColor(Qt::yellow);
     decodedTextBox_.setAutoFillBackground(true);

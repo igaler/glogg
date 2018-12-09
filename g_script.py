@@ -2,10 +2,9 @@
 import sys
 import time
 
-def parseLine(*args):
-	print "This is the name of the script: ", args[0]
-	print "Number of arguments: ", len(args)
-	print "The arguments are: " , str(args)
+def parseLine(args):
+        print "Lines to parse ", args[0]
+        print "The arguments are: " , args[1]
 
 
 def comboBox():
@@ -13,6 +12,6 @@ def comboBox():
 
 
 if __name__ == '__main__':
-	print "My Script clled"
-	parseLine(sys.argv)
+        print "My Script called"
+        parseLine(sys.argv[1:])
 
