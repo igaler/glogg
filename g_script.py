@@ -3,7 +3,7 @@ import sys
 import time
 
 def parseLine(args):
-        print "Lines to parse ", args[0]
+        print "<br>Lines to parse </br>", args[0]
         print "The arguments are: " , args[1]
 
 
@@ -12,6 +12,9 @@ def comboBox():
 
 
 if __name__ == '__main__':
-        print "My Script called"
+        print "<head><style>  b {       font-weight: bold; background-color:#ff0000;   }    </style></head>"
+        print "<body>"
+        print "<b>My Script called</b>"
         parseLine(sys.argv[1:])
+        print "</body>"
 

@@ -78,6 +78,10 @@ int TabbedCrawlerWidget::addTab( QWidget* page, const QString& label )
         // Listen for a changing data status:
         connect( crawler, &CrawlerWidget::updateLineNumber,
                 [ this, index ]( int line ) { updateLineNumber( index, line ); } );
+
+        connect( crawler, &CrawlerWidget::crLineDblClicked,
+                [ this, index ]() { handleLineDblClick( index ); } );
+
     }
 
     // Display the icon
@@ -184,6 +188,13 @@ void TabbedCrawlerWidget::updateLineNumber( int index, int line )
 {
     LOG(logDEBUG) << "TabbedCrawlerWidget::updateLineNumber " << index;
 
-
     emit currentLine( ((CrawlerWidget*)this->widget(currentIndex()))->getSelectedText() );
+}
+
+
+void TabbedCrawlerWidget::handleLineDblClick( int index )
+{
+    LOG(logDEBUG) << "TabbedCrawlerWidget::lineDblClick " << index;
+
+    emit lineDblClick();
 }

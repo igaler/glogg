@@ -20,6 +20,7 @@
 #ifndef DECODEDOCKWIDGET_H
 #define DECODEDOCKWIDGET_H
 
+
 #include <QDockWidget>
 #include <QTextEdit>
 #include <QComboBox>
@@ -37,6 +38,7 @@ class DecodeDockWidget : public QDockWidget
 
   private slots:
     void updateTextHandler( const QString& text );
+    void parseTextHandler();
     void updateProjectHandler( const QString& proj );
     void applyOptions();
 

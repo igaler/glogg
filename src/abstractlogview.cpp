@@ -472,6 +472,8 @@ void AbstractLogView::mouseDoubleClickEvent( QMouseEvent* mouseEvent )
 
         const QPoint pos = convertCoordToFilePos( mouseEvent->pos() );
         selectWordAtPosition( pos );
+
+        emit lineDblClicked();
     }
 
     emit activity();

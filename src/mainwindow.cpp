@@ -139,6 +139,9 @@ MainWindow::MainWindow( std::unique_ptr<Session> session,
     connect( &mainTabWidget_, SIGNAL(currentLine( const QString& ) ) ,
              &decodeDockWidget_, SLOT( updateTextHandler( const QString& ) ) );
 
+    connect( &mainTabWidget_, SIGNAL( lineDblClick() ) ,
+             &decodeDockWidget_, SLOT( parseTextHandler() ) );
+
     connect( this, SIGNAL( optionsChanged() ),
              &decodeDockWidget_, SLOT( applyOptions() ) );
 

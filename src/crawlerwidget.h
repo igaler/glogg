@@ -125,6 +125,8 @@ class CrawlerWidget : public QSplitter,
     // Sent up when the current line number is updated
     void updateLineNumber( int line );
 
+    void crLineDblClicked();
+
     // "auto-refresh" check has been changed
     void searchRefreshChanged( int state );
     // "ignore case" check has been changed
@@ -158,6 +160,10 @@ class CrawlerWidget : public QSplitter,
     void markLineFromMain( qint64 line );
     // Mark a line that has been clicked on the filtered (bottom) view.
     void markLineFromFiltered( qint64 line );
+
+    void mainDblCkickHandler();
+    void filteredDblCkickHandler();
+
 
     void loadingFinishedHandler( LoadingStatus status );
     // Manages the info lines to inform the user the file has changed.

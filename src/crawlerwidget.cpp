@@ -404,6 +404,16 @@ void CrawlerWidget::markLineFromFiltered( qint64 line )
     }
 }
 
+void CrawlerWidget::mainDblCkickHandler()
+{
+    emit crLineDblClicked();
+}
+
+void CrawlerWidget::filteredDblCkickHandler()
+{
+    emit crLineDblClicked();
+}
+
 void CrawlerWidget::applyConfiguration()
 {
     std::shared_ptr<Configuration> config =
@@ -807,14 +817,22 @@ void CrawlerWidget::setup()
             this, SLOT( jumpToMatchingLine( int ) ) );
     connect(filteredView, SIGNAL( newSelection( int ) ),
             filteredView, SLOT( update() ) );
+
     connect(logMainView, SIGNAL( updateLineNumber( int ) ),
             this, SLOT( updateLineNumberHandler( int ) ) );
     connect(filteredView, SIGNAL( updateLineNumber( int ) ),
             this, SLOT( updateLineNumberHandler( int ) ) );
+
     connect(logMainView, SIGNAL( markLine( qint64 ) ),
             this, SLOT( markLineFromMain( qint64 ) ) );
+    connect(logMainView, SIGNAL( lineDblClicked() ),
+            this, SLOT( mainDblCkickHandler() ) );
+
+
     connect(filteredView, SIGNAL( markLine( qint64 ) ),
             this, SLOT( markLineFromFiltered( qint64 ) ) );
+    connect(logMainView, SIGNAL( lineDblClicked() ),
+            this, SLOT( filteredDblCkickHandler() ) );
 
     connect(logMainView, SIGNAL( addToSearch( const QString& ) ),
             this, SLOT( addToSearch( const QString& ) ) );

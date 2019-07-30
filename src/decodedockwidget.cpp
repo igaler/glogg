@@ -25,7 +25,8 @@
 #include <QProcess>
 #include <QComboBox>
 #include <QHBoxLayout>
-
+#include <QDockWidget>
+#include <QtWebView>
 #include "decodedockwidget.h"
 #include "persistentinfo.h"
 #include "configuration.h"
@@ -50,9 +51,9 @@ DecodeDockWidget::DecodeDockWidget() : QDockWidget(),
     decodedTextBox_.setLineWrapMode( QTextEdit::NoWrap );
 
     QPalette pallet = decodedTextBox_.palette();
-    pallet.setColor(QPalette::Base,Qt::darkBlue);
+    pallet.setColor(QPalette::Base,Qt::lightGray);
     decodedTextBox_.setPalette(pallet);
-    decodedTextBox_.setTextColor(Qt::yellow);
+//    decodedTextBox_.setTextColor(Qt::yellow);
     decodedTextBox_.setAutoFillBackground(true);
 
     connect( &comboBox_, SIGNAL(currentTextChanged( const QString& ) ) ,
@@ -75,12 +76,17 @@ DecodeDockWidget::DecodeDockWidget() : QDockWidget(),
 
 void DecodeDockWidget::updateTextHandler( const QString& text )
 {
-    currStr_ = text;
+    currStr_ = text;    
+}
+
+void DecodeDockWidget::parseTextHandler()
+{
     parseLine();
 }
 
 void DecodeDockWidget::updateProjectHandler(const QString& proj )
 {
+    // TODO might be not accurate
     parseLine();
 }
 
@@ -110,13 +116,17 @@ void DecodeDockWidget::applyOptions()
 void DecodeDockWidget::parseLine()
 {
     QString  command("python");
-    QStringList params = QStringList()<<"g_script.py" << currStr_ << comboBox_.currentText();
+    QStringList params = QStringList();
+    params.append("g_script.py");
+    params.append(comboBox_.currentText());
+    params.append(currStr_);
+
 
     QProcess *process = new QProcess();
     process->start(command, params);
     process->waitForFinished();
     QString p_stdout = process->readAll();
-    decodedTextBox_.setText(p_stdout);
+    decodedTextBox_.setHtml(p_stdout);
     //decodedTextBox_.setPlainText(p_stdout);
     process->close();
 }

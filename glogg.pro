@@ -8,9 +8,10 @@
 TARGET = glogg
 TEMPLATE = app
 
-QT += network
+QT += network webview
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += core widgets
+
 
 win32:Debug:CONFIG += console
 

@@ -217,6 +217,8 @@ class AbstractLogView :
             QuickFindMux::QFDirection newDirection );
     // Sent up when the current line number is updated
     void updateLineNumber( int line );
+    // Sent when double click on line accure
+    void lineDblClicked();
     // Sent up when quickFind wants to show a message to the user.
     void notifyQuickFind( const QFNotification& message );
     // Sent up when quickFind wants to clear the notification.
